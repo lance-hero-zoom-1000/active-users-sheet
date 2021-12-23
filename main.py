@@ -1,5 +1,6 @@
 #! /usr/local/bin/python3.9
 
+import keys
 from MetricCalculator import MetricCalculator
 from DataFetcher import DataFetcher
 from FormatHelper import FormatHelper
@@ -7,9 +8,12 @@ from datetime import datetime, timedelta
 import calendar
 from dateutil.relativedelta import relativedelta
 import logging
+import os, json
 import numpy as np
 import pandas as pd
 import argparse
+import traceback
+from dineout_common.dineout_funcs import send_email
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -87,88 +91,107 @@ if __name__ == "__main__":
 
     logger.info("Creating instances of helpers")
 
-    for custom_date in date_range:
-        # custom_date = d
-        logger.info(custom_date)
-        data_fetcher = DataFetcher(custom_date, period=args.period)
+    try:
+        for custom_date in date_range:
+            # custom_date = d
+            logger.info(custom_date)
+            data_fetcher = DataFetcher(custom_date, period=args.period)
 
-        if args.period == "day":
-            format_helper = FormatHelper("Daily Summary")
-        elif args.period == "week":
-            format_helper = FormatHelper("Week Summary")
-        else:
-            format_helper = FormatHelper("Month Summary")
+            if args.period == "day":
+                format_helper = FormatHelper("Daily Summary")
+            elif args.period == "week":
+                format_helper = FormatHelper("Week Summary")
+            else:
+                format_helper = FormatHelper("Month Summary")
 
-        metric_calculator = MetricCalculator(custom_date, period=args.period)
+            metric_calculator = MetricCalculator(custom_date, period=args.period)
 
-        mau_data = data_fetcher.get_mau_data()
-        dp_membership = data_fetcher.get_memberships_data()
-        MetricCalculator.get_column_name(mau_data)
+            mau_data = data_fetcher.get_mau_data()
+            dp_membership = data_fetcher.get_memberships_data()
+            MetricCalculator.get_column_name(mau_data)
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.active_users(mau_data=mau_data),
-                bounds_dict=MetricCalculator.active_users_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.active_users(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.active_users_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.rdp_viewed_users(mau_data=mau_data),
-                bounds_dict=MetricCalculator.rdp_viewed_users_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.rdp_viewed_users(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.rdp_viewed_users_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dopay_users(mau_data=mau_data),
-                bounds_dict=MetricCalculator.dopay_users_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dopay_users(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.dopay_users_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dopay_transactions(mau_data=mau_data),
-                bounds_dict=MetricCalculator.dopay_transactions_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dopay_transactions(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.dopay_transactions_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dp_users_in_db(membership=dp_membership),
-                bounds_dict=MetricCalculator.dp_users_in_db_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dp_users_in_db(membership=dp_membership),
+                    bounds_dict=MetricCalculator.dp_users_in_db_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dp_active_users(mau_data=mau_data),
-                bounds_dict=MetricCalculator.dp_active_users_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dp_active_users(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.dp_active_users_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dp_redemption_users(mau_data=mau_data),
-                bounds_dict=MetricCalculator.dp_redemption_users_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dp_redemption_users(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.dp_redemption_users_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        print(
-            metric_calculator.update_sheet(
-                metric_calculator.dp_redemptions(mau_data=mau_data),
-                bounds_dict=MetricCalculator.dp_redemptions_dict,
-                formatter=format_helper,
+            print(
+                metric_calculator.update_sheet(
+                    metric_calculator.dp_redemptions(mau_data=mau_data),
+                    bounds_dict=MetricCalculator.dp_redemptions_dict,
+                    formatter=format_helper,
+                )
             )
-        )
 
-        del data_fetcher
-        del format_helper
-        del metric_calculator
+            del data_fetcher
+            del format_helper
+            del metric_calculator
+    except:
+        with open("error.txt", "w") as f:
+            traceback.print_exc(file=f)
+        traceback.print_exc()
+
+        with open(os.environ["DINEOUT_DB_CREDENTIALS"], "r") as f:
+            creds = json.load(f)
+        send_email(
+            creds.get("app_pass"),
+            subject="GA Sheet Automation Failed",
+            body="Monday Meeting Data Sheet has failed to update<br>Please look into it",
+            error=True,
+            cc=[
+                "priyanka.grover@dineout.co.in",
+                "vandit.gupta@dineout.co.in",
+                "jithin.haridas@dineout.co.in",
+            ],
+        )
