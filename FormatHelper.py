@@ -43,6 +43,9 @@ class SheetFormats:
     TABLE_COLUMNS.set_text_format("fontSize", 10)
     TABLE_COLUMNS.set_text_format("bold", True)
     TABLE_COLUMNS.set_text_format("foregroundColor", (0, 0, 0, 0))
+    TABLE_COLUMNS.set_number_format(
+        format_type=pygsheets.FormatType.NUMBER, pattern="dd-mmm-yyyy"
+    )
     TABLE_COLUMNS.color = (1, 0.95, 0.8)
     TABLE_COLUMNS.set_horizontal_alignment(
         pygsheets.custom_types.HorizontalAlignment.CENTER
@@ -170,9 +173,9 @@ class FormatHelper(SheetFormats):
                 worksheet=self.wks,
             )
             trange.update_borders(
-                red=40,
-                green=40,
-                blue=40,
+                red=169 / 255,
+                green=194 / 255,
+                blue=240 / 255,
                 inner_horizontal=True,
                 inner_vertical=True,
                 top=True,
