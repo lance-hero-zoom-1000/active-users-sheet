@@ -6,7 +6,7 @@ import re
 import logging
 import pandas as pd
 from dineout_common.dineout_funcs import get_data_from_server
-import queries
+import Helper.queries as queries
 
 
 logger = logging.getLogger(__name__)
@@ -246,39 +246,20 @@ class DataFetcher:
         file_name = "mauData" + fname_period
         logger.debug(f"Searching for: {file_name}")
         use_extract = False
-        present = (False, "NA")
         file_path = (
             DataFetcher.base_path
-            + f"/{file_name}_till_{self.end_date.strftime('%Y-%m-%d')}.parquet"
+            + f"/{file_name}_{self.start_date.strftime('%Y-%m-%d')}_to_{self.end_date.strftime('%Y-%m-%d')}.parquet"
         )
 
         for file in os.listdir(DataFetcher.base_path):
-            if file_name in file:
-                present = (True, DataFetcher.base_path + f"/{file}")
-
-        if present[0]:
-            present_till = re.search(
-                "[a-zA-Z]+_till_([\d]{4}-[\d]{2}-[\d]{2}).parquet", present[1]
-            ).group(1)
-            present_till = datetime.strptime(present_till, "%Y-%m-%d")
-            if present_till > (self.end_date - relativedelta(days=5)):
+            f = DataFetcher.base_path + "/" + file
+            if file_path == f:
                 use_extract = True
 
         if use_extract:
             logger.info("Using extract")
-            data = pd.read_parquet(present[1])
-            if self.period == "week":
-                data = data[
-                    (data["week_start_date"] >= self.start_date.date())
-                    & (data["week_start_date"] <= self.end_date.date())
-                ]
-            elif self.period == "month":
-                data = data[
-                    (data["month"] >= self.start_date)
-                    & (data["month"] <= self.end_date)
-                ]
-            else:
-                data = data[(data["date"] == self.end_date)]
+            data = pd.read_parquet(file_path)
+
             return data
         else:
             logger.info("Getting MAU data")
@@ -288,16 +269,5 @@ class DataFetcher:
             )
             logger.info("Saving data to dumps")
             data.to_parquet(file_path)
-            if self.period == "week":
-                data = data[
-                    (data["week_start_date"] >= self.start_date.date())
-                    & (data["week_start_date"] <= self.end_date.date())
-                ]
-            elif self.period == "month":
-                data = data[
-                    (data["month"] >= self.start_date)
-                    & (data["month"] <= self.end_date)
-                ]
-            else:
-                data = data[(data["date"] == self.end_date)]
+
             return data

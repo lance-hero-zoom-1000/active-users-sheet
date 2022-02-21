@@ -1,14 +1,22 @@
 #! /usr/local/bin/python3.9
 
-import keys
-from MetricCalculator import MetricCalculator
-from DataFetcher import DataFetcher
-from FormatHelper import FormatHelper
+import os
+from dotenv import load_dotenv
+
+if os.path.exists("/home/lawrence.veigas/projects/creds/.env"):
+    ok = load_dotenv("/home/lawrence.veigas/projects/creds/.env")
+else:
+    ok = load_dotenv("/users/lawrence.veigas/downloads/projects/creds/.env")
+print("Environment Variables Loaded: ", ok)
+
+from Helper.MetricCalculator import MetricCalculator
+from Helper.DataFetcher import DataFetcher
+from Helper.FormatHelper import FormatHelper
 from datetime import datetime, timedelta
 import calendar
 from dateutil.relativedelta import relativedelta
 import logging
-import os, json
+import json
 import numpy as np
 import pandas as pd
 import argparse

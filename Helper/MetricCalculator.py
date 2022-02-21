@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import logging
 import os, json, pygsheets
-from FormatHelper import FormatHelper
+from Helper.GoogleSheets import BaseOperations
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -18,10 +17,10 @@ logger.addHandler(stream)
 
 with open(os.environ["DINEOUT_DB_CREDENTIALS"], "r") as f:
     creds = json.load(f)
-gc = pygsheets.authorize(os.environ["GOOGLE_OAUTH_CREDENTIALS"])
+gc = pygsheets.authorize(service_account_file=os.environ["GADINEOUT_SERVICE_ACCOUNT"])
 
 
-class MetricCalculator:
+class MetricCalculator(BaseOperations):
 
     # BELOW ARE SOME CLASS VARIABLES
     # SOME ARE DEFINED DURING SOME FUNCTION PERFORMED BY AND INSTANCE
@@ -78,8 +77,6 @@ class MetricCalculator:
         "key": "Total Redemptions by DP Users",
     }
 
-    sheet = gc.open_by_url(creds.get("sheets").get("ga_sheet_automation"))
-
     @staticmethod
     def remove_nulls_from_list(li):
         container = []
@@ -125,28 +122,11 @@ class MetricCalculator:
         return col_name
 
     def __init__(self, custom_date, period="week"):
-        self.end_date = datetime.combine(custom_date.date(), datetime.min.time())
-        self.period = period
+        super().__init__(custom_date, period)
 
         # SET PERIOD AS CLASS VARIABLE TOO AS IT WILL B USED
         # FOR CALCULATING COL_NAME
         MetricCalculator.period = period
-
-        if self.period == "week":
-            self.start_date = self.end_date - timedelta(self.end_date.weekday())
-            self.automation_tab = MetricCalculator.sheet.worksheet_by_title(
-                "Week Summary"
-            )
-        elif self.period == "month":
-            self.start_date = self.end_date.replace(day=1)
-            self.automation_tab = MetricCalculator.sheet.worksheet_by_title(
-                "Month Summary"
-            )
-        else:
-            self.start_date = self.end_date
-            self.automation_tab = MetricCalculator.sheet.worksheet_by_title(
-                "Daily Summary"
-            )
 
         logger.info(f"Getting data for dates: {self.start_date} to {self.end_date}")
 
@@ -530,57 +510,3 @@ class MetricCalculator:
         table.columns = [MetricCalculator.dp_redemptions_dict.get("key"), col_name]
         return table
 
-    @staticmethod
-    def get_data_from_sheet(bounds, wks):
-        # bounds should be a dict of tuples with start and end
-        start = bounds.get("start")
-        end = bounds.get("end")
-        cols = wks.get_row(start[0], include_tailing_empty=False)
-        if len(cols) > 0:
-            col_n = len(cols)
-            latest_column = cols[-1]
-
-            logger.info(latest_column)
-            logger.info(MetricCalculator.col_name)
-            logger.info(latest_column == MetricCalculator.col_name)
-            if latest_column == MetricCalculator.col_name:
-                col_n = col_n - 1
-
-            df = wks.get_as_df(
-                start=start,
-                end=(end, col_n),
-            )
-
-            return df
-        else:
-            return None
-
-    def update_sheet(
-        self,
-        data_to_update,
-        bounds_dict,
-        formatter=None,
-    ):
-
-        wks = self.automation_tab
-        logger.debug(f"Using worksheet: {wks}")
-        sheet_data = MetricCalculator.get_data_from_sheet(bounds_dict, wks)
-
-        if isinstance(sheet_data, pd.DataFrame):
-            if not sheet_data.empty:
-                data_to_update = sheet_data.merge(
-                    data_to_update, on=bounds_dict.get("key"), how="left"
-                )
-
-        if bounds_dict.get("copy_head") != None:
-            copy_head = bounds_dict.get("copy_head")
-        else:
-            copy_head = True
-        wks.set_dataframe(
-            data_to_update, nan="", start=bounds_dict.get("start"), copy_head=copy_head
-        )
-
-        if isinstance(formatter, FormatHelper):
-            formatter.format_worksheet(bounds_dict)
-
-        return "Updated Successfully"
