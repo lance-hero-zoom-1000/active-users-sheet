@@ -31,49 +31,49 @@ class MetricCalculator(BaseOperations):
     active_users_dict = {
         "start": (3, 2),
         "end": 11,
-        "subsections": [5, 6, 8, 9],
+        "value_rates": [5, 6, 8, 9],
         "key": "Active Users",
     }
     rdp_viewed_users_dict = {
         "start": (31, 2),
         "end": 39,
-        "subsections": [5, 6, 8, 9],
+        "value_rates": [5, 6, 8, 9],
         "key": "RDP Viewed Users",
     }
     dopay_users_dict = {
         "start": (50, 2),
         "end": 55,
-        "subsections": [5, 6],
+        "value_rates": [5, 6],
         "key": "Dineout Pay Transacted Users",
     }
     dopay_transactions_dict = {
         "start": (57, 2),
         "end": 68,
-        "subsections": [5, 6, 11, 12],
+        "value_rates": [5, 6, 11, 12],
         "key": "Dineout Pay Transactions and GMV",
     }
     dp_users_in_db_dict = {
         "start": (88, 2),
         "end": 94,
-        "subsections": [3, 4, 5, 6, 7],
+        "value_rates": [3, 4, 5, 6, 7],
         "key": "Users with Active DP Subscription",
     }
     dp_active_users_dict = {
         "start": (96, 2),
         "end": 102,
-        "subsections": [3, 4, 5, 6, 7],
+        "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who launched App",
     }
     dp_redemption_users_dict = {
         "start": (112, 2),
         "end": 118,
-        "subsections": [3, 4, 5, 6, 7],
+        "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who redeemed",
     }
     dp_redemptions_dict = {
         "start": (128, 2),
         "end": 134,
-        "subsections": [3, 4, 5, 6, 7],
+        "value_rates": [3, 4, 5, 6, 7],
         "key": "Total Redemptions by DP Users",
     }
 
@@ -101,14 +101,13 @@ class MetricCalculator(BaseOperations):
         else:
             return "others"
 
-    @classmethod
-    def get_column_name(cls, data):
-        if cls.period == "week":
+    def get_column_name(self, data):
+        if self.period == "week":
             s = data["week_start_date"].unique()[0]
             e = data["week_end_date"].unique()[0]
 
             col_name = s.strftime("%d-%b") + " to " + e.strftime("%d-%b")
-        elif cls.period == "month":
+        elif self.period == "month":
             s = data["month"].unique()[0]
             s = pd.to_datetime(s)
             col_name = s.strftime("%b'%y")
@@ -117,7 +116,7 @@ class MetricCalculator(BaseOperations):
             s = pd.to_datetime(s)
             col_name = s.strftime("%d-%b-%Y")
 
-        cls.col_name = col_name
+        self.col_name = col_name
         logger.info(col_name)
         return col_name
 
@@ -172,9 +171,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.active_users_dict.get("key"), col_name]
         return table
@@ -221,9 +220,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.rdp_viewed_users_dict.get("key"), col_name]
         return table
@@ -258,9 +257,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.dopay_users_dict.get("key"), col_name]
         return table
@@ -312,9 +311,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.dopay_transactions_dict.get("key"), col_name]
         return table
@@ -341,9 +340,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.dp_active_users_dict.get("key"), col_name]
         return table
@@ -429,7 +428,7 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
             raise AttributeError(
                 "Need to calculate other metrics before calculating this. Call after using active_users"
@@ -470,9 +469,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.dp_redemption_users_dict.get("key"), col_name]
         return table
@@ -503,9 +502,9 @@ class MetricCalculator(BaseOperations):
         table.reset_index(inplace=True)
 
         try:
-            col_name = MetricCalculator.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculator.get_column_name(data)
+            col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.dp_redemptions_dict.get("key"), col_name]
         return table

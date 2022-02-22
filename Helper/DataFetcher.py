@@ -264,10 +264,28 @@ class DataFetcher:
         else:
             logger.info("Getting MAU data")
             data = get_data_from_server(
-                query=query,
+                query=query.format(
+                    sdate=self.start_date.strftime('%Y-%m-%d'),
+                    edate=self.end_date.strftime('%Y-%m-%d')
+                ),
                 server_creds=creds.get("Torqus-ReadOnly"),
             )
             logger.info("Saving data to dumps")
-            data.to_parquet(file_path)
 
+            if self.period == "week":
+                data = data[
+                    (data["week_start_date"] >= self.start_date.date())
+                    & (data["week_start_date"] <= self.end_date.date())
+                ]
+            elif self.period == "month":
+                data["month"] = data["month"].dt.date
+                data = data[
+                    (data["month"] >= self.start_date.date())
+                    & (data["month"] <= self.end_date.date())
+                ]
+            else:
+                data["date"] = data["date"].dt.date
+                data = data[(data["date"] == self.end_date.date())]
+
+            data.to_parquet(file_path)
             return data

@@ -1,10 +1,9 @@
 from Helper.MetricCalculatorCity import MetricCalculatorCity
 from Helper.DataFetcher import DataFetcher
 from datetime import datetime
-from main import calculate_date_range
-import sys
+from dateutil.relativedelta import relativedelta
 
-def update_citywise(drange, period="week"):
+def update_citywise(drange, period):
     f = len(drange)
     
     for i, d in enumerate(drange):
@@ -39,20 +38,6 @@ def update_citywise(drange, period="week"):
         del df, updater, mau_data
 
 if __name__ == '__main__':
-
-    period = sys.argv[1]
-    
-    if period == "day":
-        sdate = datetime(2021,12,1)
-        edate = datetime(2022,2,20)
-    elif period=="week":
-        sdate = datetime(2021,11,1)
-        edate = datetime(2022,2,20)
-    elif period=="month":
-        sdate = datetime(2021,10,1)
-        edate = datetime(2022,2,20)
-
-    drange = calculate_date_range(sdate, edate, period=period)
-
-    update_citywise(drange, period=period)
+    yesterday = datetime.today() - relativedelta(days=1)
+    update_citywise([yesterday], period="day")
     

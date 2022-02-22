@@ -9,9 +9,8 @@ else:
     ok = load_dotenv("/users/lawrence.veigas/downloads/projects/creds/.env")
 print("Environment Variables Loaded: ", ok)
 
-from Helper.MetricCalculator import MetricCalculator
-from Helper.DataFetcher import DataFetcher
-from Helper.FormatHelper import FormatHelper
+from Updater.update_regular import update_regular
+from Updater.update_citywise import update_citywise
 from datetime import datetime, timedelta
 import calendar
 from dateutil.relativedelta import relativedelta
@@ -100,91 +99,11 @@ if __name__ == "__main__":
     logger.info("Creating instances of helpers")
 
     try:
-        for custom_date in date_range:
-            # custom_date = d
-            logger.info(custom_date)
-            data_fetcher = DataFetcher(custom_date, period=args.period)
-
-            if args.period == "day":
-                format_helper = FormatHelper("Daily Summary")
-            elif args.period == "week":
-                format_helper = FormatHelper("Week Summary")
-            else:
-                format_helper = FormatHelper("Month Summary")
-
-            metric_calculator = MetricCalculator(custom_date, period=args.period)
-
-            mau_data = data_fetcher.get_mau_data()
-            dp_membership = data_fetcher.get_memberships_data()
-            MetricCalculator.get_column_name(mau_data)
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.active_users(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.active_users_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.rdp_viewed_users(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.rdp_viewed_users_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dopay_users(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.dopay_users_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dopay_transactions(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.dopay_transactions_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dp_users_in_db(membership=dp_membership),
-                    bounds_dict=MetricCalculator.dp_users_in_db_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dp_active_users(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.dp_active_users_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dp_redemption_users(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.dp_redemption_users_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            print(
-                metric_calculator.update_sheet(
-                    metric_calculator.dp_redemptions(mau_data=mau_data),
-                    bounds_dict=MetricCalculator.dp_redemptions_dict,
-                    formatter=format_helper,
-                )
-            )
-
-            del data_fetcher
-            del format_helper
-            del metric_calculator
+        if args.test:
+            print(date_range)
+        else:
+            update_regular(date_range, period=args.period)
+            update_citywise(date_range, period=args.period)
     except:
         with open("error.txt", "w") as f:
             traceback.print_exc(file=f)

@@ -127,9 +127,7 @@ mau_data_month = """
 select *
 from mau_data_historic_month mdhm 
 WHERE 
-	date(`month`) between 
-		DATE_FORMAT(curdate() - interval '6' month, '%Y-%m-01') 
-		and DATE_FORMAT(curdate() - interval (day(curdate())) day, '%Y-%m-%d')
+	date(`month`) between date('{sdate}') and date('{edate}')
 union
 select *
 from mau_data_current_month mdcm 
@@ -140,9 +138,7 @@ mau_data_week = """
 select *
 from mau_data_historic_week mdhw 
 WHERE 
-	iso_week between 
-		week(curdate() - interval '30' week, 1) 
-		and week(curdate() - interval '1' week, 1)		
+	date(`week_start_date`) between date('{sdate}') and date('{edate}')
 union
 select *
 from mau_data_current_week mdcw 
@@ -152,7 +148,5 @@ mau_data_day = """
 select *
 from mau_data_daily
 where 
-	`date` between 
-		curdate() - interval '200' day 
-		and curdate() - interval '1' day
+	`date` between date('{sdate}') and date('{edate}')
 """

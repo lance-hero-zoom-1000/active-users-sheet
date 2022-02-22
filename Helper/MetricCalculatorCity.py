@@ -79,25 +79,22 @@ class MetricCalculatorCity(BaseOperationsCity):
         else:
             return "others"
 
-    @classmethod
-    def get_column_name(cls, data):
-        if cls.period == "week":
+    def get_column_name(self, data):
+        if self.period == "week":
             s = data["week_start_date"].unique()[0]
             e = data["week_end_date"].unique()[0]
 
             col_name = s.strftime("%d-%b") + " to " + e.strftime("%d-%b")
-        elif cls.period == "month":
+        elif self.period == "month":
             s = data["month"].unique()[0]
             s = pd.to_datetime(s)
             col_name = s.strftime("%b'%y")
         else:
-            print(data["date"].unique())
-            
             s = data["date"].unique()[0]
             s = pd.to_datetime(s)
             col_name = s.strftime("%d-%b-%Y")
 
-        cls.col_name = col_name
+        self.col_name = col_name
         logger.info(col_name)
         return col_name
 
@@ -117,15 +114,13 @@ class MetricCalculatorCity(BaseOperationsCity):
             lambda x: x if x in top_cities else 'Others'
         )
 
-        print(data)
-
         table = pd.DataFrame(data.groupby('City')['users'].sum())
         table.reset_index(inplace=True)
         
         try:
-            col_name = MetricCalculatorCity.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(data)
+            col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.active_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)
@@ -145,9 +140,9 @@ class MetricCalculatorCity(BaseOperationsCity):
         table.reset_index(inplace=True)
         
         try:
-            col_name = MetricCalculatorCity.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(data)
+            col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.dp_active_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)
@@ -170,9 +165,9 @@ class MetricCalculatorCity(BaseOperationsCity):
         table.reset_index(inplace=True)
         
         try:
-            col_name = MetricCalculatorCity.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(data)
+            col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.loggedin_active_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)
@@ -195,9 +190,9 @@ class MetricCalculatorCity(BaseOperationsCity):
         table.reset_index(inplace=True)
         
         try:
-            col_name = MetricCalculatorCity.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(data)
+            col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.non_loggedin_active_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)
@@ -215,9 +210,9 @@ class MetricCalculatorCity(BaseOperationsCity):
         table.reset_index(inplace=True)
         
         try:
-            col_name = MetricCalculatorCity.col_name
+            col_name = self.col_name
         except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(data)
+            col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.rdp_viewed_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)

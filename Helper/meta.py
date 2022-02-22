@@ -1,17 +1,7 @@
 import os, json
-
-from dotenv import load_dotenv
-
-if os.path.exists("/home/lawrence.veigas/projects/creds/.env"):
-    ok = load_dotenv("/home/lawrence.veigas/projects/creds/.env")
-else:
-    ok = load_dotenv("/users/lawrence.veigas/downloads/projects/creds/.env")
-print("Environment variables loaded ", ok)
-
 import pygsheets
 import pandas as pd
 import numpy as np
-from datetime import datetime
 
 bookings_src_platform_mapping = {
     1: "Website",
