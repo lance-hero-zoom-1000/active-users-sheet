@@ -5,3 +5,5 @@ venv/
 *.json
 *.ipynb
 .DS_Store
+*.txt
+!requirements.txt

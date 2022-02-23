@@ -5,6 +5,7 @@ import numpy as np
 import logging
 from Helper.meta import get_credentials
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -62,10 +63,10 @@ class BaseOperations:
         )
         
 
-    @staticmethod
-    def get_data_from_sheet(bounds, wks):
+    def get_data_from_sheet(self, bounds):
         # bounds should be a dict of tuples with start and end
         logger.debug(f"Retreiving data from Google sheets")
+        wks = self.wks
         start = bounds.get("start")
         end = bounds.get("end")
         cols = wks.get_row(start[0], include_tailing_empty=False)
@@ -74,7 +75,16 @@ class BaseOperations:
             logger.debug(f"No. of columns detected in Google sheet: {col_n}")
             latest_month = cols[-1]
 
-            if latest_month == datetime.today().strftime("%b'%y"):
+            # comparision month is dependant on period
+            if self.period == "week":
+                comparitor = self.start_date.strftime("%d-%b") + " to " + (self.start_date + relativedelta(days=6)).strftime("%d-%b")
+            elif self.period == "day":
+                comparitor = self.end_date.strftime("%d-%b-%Y")
+            else:
+                comparitor = self.end_date.strftime("%b'%y")
+            
+            
+            if latest_month == comparitor:
                 col_n = col_n - 1
 
             df = wks.get_as_df(
@@ -93,7 +103,7 @@ class BaseOperations:
         bounds_dict,
         format=False,
     ):
-        sheet_data = BaseOperations.get_data_from_sheet(bounds_dict, self.wks)
+        sheet_data = BaseOperations.get_data_from_sheet(self, bounds_dict)
 
         if isinstance(sheet_data, pd.DataFrame):
             if not sheet_data.empty:
@@ -152,7 +162,7 @@ class BaseOperationsCity:
         bounds_dict,
         format=False,
     ):
-        sheet_data = BaseOperations.get_data_from_sheet(bounds_dict, self.wks)
+        sheet_data = BaseOperations.get_data_from_sheet(self, bounds_dict)
 
         if isinstance(sheet_data, pd.DataFrame):
             if not sheet_data.empty:
