@@ -47,32 +47,32 @@ class MetricCalculator(BaseOperations):
         "key": "Dineout Pay Transacted Users",
     }
     dopay_transactions_dict = {
-        "start": (57, 2),
-        "end": 68,
+        "start": (69, 2),
+        "end": 80,
         "value_rates": [5, 6, 11, 12],
         "key": "Dineout Pay Transactions and GMV",
     }
     dp_users_in_db_dict = {
-        "start": (88, 2),
-        "end": 94,
+        "start": (94, 2),
+        "end": 100,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Users with Active DP Subscription",
     }
     dp_active_users_dict = {
-        "start": (96, 2),
-        "end": 102,
+        "start": (102, 2),
+        "end": 108,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who launched App",
     }
     dp_redemption_users_dict = {
-        "start": (112, 2),
-        "end": 118,
+        "start": (118, 2),
+        "end": 124,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who redeemed",
     }
     dp_redemptions_dict = {
-        "start": (128, 2),
-        "end": 134,
+        "start": (134, 2),
+        "end": 140,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Total Redemptions by DP Users",
     }
@@ -508,4 +508,3 @@ class MetricCalculator(BaseOperations):
 
         table.columns = [MetricCalculator.dp_redemptions_dict.get("key"), col_name]
         return table
-
