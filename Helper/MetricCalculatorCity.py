@@ -30,28 +30,28 @@ class MetricCalculatorCity(BaseOperationsCity):
     # - col_name
 
     active_users_dict = {
-        "start": (146, 1),
-        "end": 171,
+        "start": (154, 1),
+        "end": 179,
         "key": "Citywise Active Users (Overall)",
     }
     dp_active_users_dict = {
-        "start": (175, 1),
-        "end": 200,
+        "start": (212, 1),
+        "end": 237,
         "key": "DP Users who launched App",
     }
     loggedin_active_users_dict = {
-        "start": (205, 1),
-        "end": 230,
+        "start": (299, 1),
+        "end": 324,
         "key": "Logged In Users who launched App (Non DP members)",
     }
     non_loggedin_active_users_dict = {
-        "start": (235, 1),
-        "end": 260,
+        "start": (388, 1),
+        "end": 413,
         "key": "Non Logged In Users who launched App",
     }
     rdp_viewed_users_dict = {
-        "start": (265, 1),
-        "end": 290,
+        "start": (475, 1),
+        "end": 500,
         "key": "Users who viewed RDP (Overall)",
     }
 
@@ -110,13 +110,13 @@ class MetricCalculatorCity(BaseOperationsCity):
     def calculate_active_users(self, **kwargs):
         data = kwargs.get("mau_data")
 
-        data['City'] = data['custom_dimension_city'].apply(
-            lambda x: x if x in top_cities else 'Others'
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(data.groupby('City')['users'].sum())
+        table = pd.DataFrame(data.groupby("City")["users"].sum())
         table.reset_index(inplace=True)
-        
+
         try:
             col_name = self.col_name
         except AttributeError:
@@ -130,15 +130,15 @@ class MetricCalculatorCity(BaseOperationsCity):
     def calculate_dp_active_users(self, **kwargs):
         data = kwargs.get("mau_data")
 
-        data = data.loc[data["subscription_type"]!="non_dp_members"].copy()
+        data = data.loc[data["subscription_type"] != "non_dp_members"].copy()
 
-        data['City'] = data['custom_dimension_city'].apply(
-            lambda x: x if x in top_cities else 'Others'
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(data.groupby('City')['users'].sum())
+        table = pd.DataFrame(data.groupby("City")["users"].sum())
         table.reset_index(inplace=True)
-        
+
         try:
             col_name = self.col_name
         except AttributeError:
@@ -153,23 +153,26 @@ class MetricCalculatorCity(BaseOperationsCity):
         data = kwargs.get("mau_data")
 
         data = data.loc[
-            (data["subscription_type"]=="non_dp_members")
-            & (data["login_status"]=="active")
+            (data["subscription_type"] == "non_dp_members")
+            & (data["login_status"] == "active")
         ].copy()
 
-        data['City'] = data['custom_dimension_city'].apply(
-            lambda x: x if x in top_cities else 'Others'
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(data.groupby('City')['users'].sum())
+        table = pd.DataFrame(data.groupby("City")["users"].sum())
         table.reset_index(inplace=True)
-        
+
         try:
             col_name = self.col_name
         except AttributeError:
             col_name = MetricCalculatorCity.get_column_name(self, data)
 
-        col_names = (MetricCalculatorCity.loggedin_active_users_dict.get("key"), col_name)
+        col_names = (
+            MetricCalculatorCity.loggedin_active_users_dict.get("key"),
+            col_name,
+        )
         table = rename_city_columns(table, col_names)
 
         return table
@@ -178,23 +181,26 @@ class MetricCalculatorCity(BaseOperationsCity):
         data = kwargs.get("mau_data")
 
         data = data.loc[
-            (data["subscription_type"]=="non_dp_members")
-            & (data["login_status"]!="active")
+            (data["subscription_type"] == "non_dp_members")
+            & (data["login_status"] != "active")
         ].copy()
 
-        data['City'] = data['custom_dimension_city'].apply(
-            lambda x: x if x in top_cities else 'Others'
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(data.groupby('City')['users'].sum())
+        table = pd.DataFrame(data.groupby("City")["users"].sum())
         table.reset_index(inplace=True)
-        
+
         try:
             col_name = self.col_name
         except AttributeError:
             col_name = MetricCalculatorCity.get_column_name(self, data)
 
-        col_names = (MetricCalculatorCity.non_loggedin_active_users_dict.get("key"), col_name)
+        col_names = (
+            MetricCalculatorCity.non_loggedin_active_users_dict.get("key"),
+            col_name,
+        )
         table = rename_city_columns(table, col_names)
 
         return table
@@ -202,13 +208,13 @@ class MetricCalculatorCity(BaseOperationsCity):
     def calculate_rdp_views_overall(self, **kwargs):
         data = kwargs.get("mau_data")
 
-        data['City'] = data['custom_dimension_city'].apply(
-            lambda x: x if x in top_cities else 'Others'
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(data.groupby('City')['restaurants_visited_users'].sum())
+        table = pd.DataFrame(data.groupby("City")["restaurants_visited_users"].sum())
         table.reset_index(inplace=True)
-        
+
         try:
             col_name = self.col_name
         except AttributeError:
@@ -218,5 +224,3 @@ class MetricCalculatorCity(BaseOperationsCity):
         table = rename_city_columns(table, col_names)
 
         return table
-
-    
