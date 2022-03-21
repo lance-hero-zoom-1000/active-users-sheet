@@ -61,6 +61,13 @@ def calculate_date_range(start_date, end_date, period="month"):
 
             date_range.append(date_to_append)
 
+    elif period == "dod":
+        for date in drange:
+            date = date.to_pydatetime()
+            today_weekday = datetime.today().weekday()
+            if (date.weekday() + 1) % 7 == today_weekday:
+                date_range.append(date)
+
     date_range = np.unique(np.array(date_range))
     return date_range
 
