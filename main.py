@@ -3,10 +3,10 @@
 import os
 from dotenv import load_dotenv
 
-if os.path.exists("/home/lawrence.veigas/projects/creds/.env"):
-    ok = load_dotenv("/home/lawrence.veigas/projects/creds/.env")
+if os.path.exists("/home/jithin.haridas/projects/creds/.env"):
+    ok = load_dotenv("/home/jithin.haridas/projects/creds/.env")
 else:
-    ok = load_dotenv("/users/lawrence.veigas/downloads/projects/creds/.env")
+    ok = load_dotenv("C:\Projects\creds\.env")
 print("Environment Variables Loaded: ", ok)
 
 from Updater.update_regular import update_regular
@@ -65,6 +65,7 @@ def calculate_date_range(start_date, end_date, period="month"):
         for date in drange:
             date = date.to_pydatetime()
             today_weekday = datetime.today().weekday()
+
             if (date.weekday() + 1) % 7 == today_weekday:
                 date_range.append(date)
 

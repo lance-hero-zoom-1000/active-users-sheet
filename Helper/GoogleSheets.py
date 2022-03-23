@@ -28,40 +28,36 @@ logger.addHandler(stream_handler)
 class BaseOperations:
     creds = get_credentials()
     gc = get_credentials(type="gc")
-    sheet = gc.open_by_url(
-        creds.get("sheets").get("ga_sheet_automation")
-    )
+    sheet = gc.open_by_url(creds.get("sheets").get("ga_sheet_automation"))
 
     def __init__(self, end_date: datetime, period: str):
-        self.end_date = datetime.combine(
-            end_date.date(), datetime.min.time()
-        )
+        self.end_date = datetime.combine(end_date.date(), datetime.max.time())
         self.period = period
 
         if self.period == "week":
             self.start_date = self.end_date - timedelta(self.end_date.weekday())
-            self.wks = BaseOperations.sheet.worksheet_by_title(
-                "Week Summary"
-            )
+            self.wks = BaseOperations.sheet.worksheet_by_title("Week Summary")
             self.formatter = FormatHelper("Week Summary")
 
         elif self.period == "month":
             self.start_date = self.end_date.replace(day=1)
-            self.wks = BaseOperations.sheet.worksheet_by_title(
-                "Month Summary"
-            )
+            self.wks = BaseOperations.sheet.worksheet_by_title("Month Summary")
             self.formatter = FormatHelper("Month Summary")
+
+        elif self.period == "dod":
+            start = self.end_date - relativedelta(months=+2)
+            self.start_date = start + timedelta(
+                days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
+            )
+            self.wks = BaseOperations.sheet.worksheet_by_title("DoD (WIP)")
+            self.formatter = FormatHelper("DoD (WIP)")
+
         else:
             self.start_date = self.end_date
-            self.wks = BaseOperations.sheet.worksheet_by_title(
-                "Daily Summary"
-            )
+            self.wks = BaseOperations.sheet.worksheet_by_title("Daily Summary")
             self.formatter = FormatHelper("Daily Summary")
 
-        self.end_date = datetime.combine(
-            end_date.date(), datetime.max.time()
-        )
-        
+        self.end_date = datetime.combine(end_date.date(), datetime.max.time())
 
     def get_data_from_sheet(self, bounds):
         # bounds should be a dict of tuples with start and end
@@ -77,13 +73,16 @@ class BaseOperations:
 
             # comparision month is dependant on period
             if self.period == "week":
-                comparitor = self.start_date.strftime("%d-%b") + " to " + (self.start_date + relativedelta(days=6)).strftime("%d-%b")
+                comparitor = (
+                    self.start_date.strftime("%d-%b")
+                    + " to "
+                    + (self.start_date + relativedelta(days=6)).strftime("%d-%b")
+                )
             elif self.period == "day":
                 comparitor = self.end_date.strftime("%d-%b-%Y")
             else:
                 comparitor = self.end_date.strftime("%b'%y")
-            
-            
+
             if latest_month == comparitor:
                 col_n = col_n - 1
 
@@ -122,39 +121,27 @@ class BaseOperations:
 class BaseOperationsCity:
     creds = get_credentials()
     gc = get_credentials(type="gc")
-    sheet = gc.open_by_url(
-        creds.get("sheets").get("ga_sheet_automation")
-    )
+    sheet = gc.open_by_url(creds.get("sheets").get("ga_sheet_automation"))
 
     def __init__(self, end_date: datetime, period: str):
-        self.end_date = datetime.combine(
-            end_date.date(), datetime.min.time()
-        )
+        self.end_date = datetime.combine(end_date.date(), datetime.min.time())
         self.period = period
 
         if self.period == "week":
             self.start_date = self.end_date - timedelta(self.end_date.weekday())
-            self.wks = BaseOperationsCity.sheet.worksheet_by_title(
-                "Week Summary"
-            )
+            self.wks = BaseOperationsCity.sheet.worksheet_by_title("Week Summary")
             self.formatter = FormatHelper("Week Summary", city=True)
 
         elif self.period == "month":
             self.start_date = self.end_date.replace(day=1)
-            self.wks = BaseOperationsCity.sheet.worksheet_by_title(
-                "Month Summary"
-            )
+            self.wks = BaseOperationsCity.sheet.worksheet_by_title("Month Summary")
             self.formatter = FormatHelper("Month Summary", city=True)
         else:
             self.start_date = self.end_date
-            self.wks = BaseOperationsCity.sheet.worksheet_by_title(
-                "Daily Summary"
-            )
+            self.wks = BaseOperationsCity.sheet.worksheet_by_title("Daily Summary")
             self.formatter = FormatHelper("Daily Summary", city=True)
 
-        self.end_date = datetime.combine(
-            end_date.date(), datetime.max.time()
-        )
+        self.end_date = datetime.combine(end_date.date(), datetime.max.time())
 
     def update_sheet(
         self,

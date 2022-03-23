@@ -31,14 +31,21 @@ class DataFetcher:
         os.mkdir(base_path)
 
     def __init__(self, custom_date, period="week"):
-        self.end_date = datetime.combine(custom_date.date(), datetime.min.time())
+        self.end_date = datetime.combine(custom_date.date(), datetime.max.time())
 
         if period == "week":
             self.start_date = self.end_date - timedelta(self.end_date.weekday())
         elif period == "month":
             self.start_date = self.end_date.replace(day=1)
+        elif period == "dod":
+            start = self.end_date - relativedelta(months=+2)
+            self.start_date = start + timedelta(
+                days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
+            )
         else:
             self.start_date = self.end_date
+
+        self.start_date = datetime.combine(self.start_date.date(), datetime.min.time())
 
         self.period = period
 
@@ -265,8 +272,8 @@ class DataFetcher:
             logger.info("Getting MAU data")
             data = get_data_from_server(
                 query=query.format(
-                    sdate=self.start_date.strftime('%Y-%m-%d'),
-                    edate=self.end_date.strftime('%Y-%m-%d')
+                    sdate=self.start_date.strftime("%Y-%m-%d"),
+                    edate=self.end_date.strftime("%Y-%m-%d"),
                 ),
                 server_creds=creds.get("Torqus-ReadOnly"),
             )
