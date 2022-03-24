@@ -248,6 +248,8 @@ class DataFetcher:
             query = queries.mau_data_week
         elif self.period == "month":
             query = queries.mau_data_month
+        elif self.period == "dod":
+            query = queries.mau_data_dod
 
         fname_period = self.period.title()
         file_name = "mauData" + fname_period
@@ -289,6 +291,12 @@ class DataFetcher:
                 data = data[
                     (data["month"] >= self.start_date.date())
                     & (data["month"] <= self.end_date.date())
+                ]
+            elif self.period == "dod":
+                data["dod"] = data["dod"].dt.date
+                data = data[
+                    (data["dod"] >= self.start_date.date())
+                    & (data["dod"] <= self.end_date.date())
                 ]
             else:
                 data["date"] = data["date"].dt.date
