@@ -7,7 +7,8 @@ import logging
 import pandas as pd
 from dineout_common.dineout_funcs import get_data_from_server
 import Helper.queries as queries
-
+import calendar
+import numpy as np
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,6 +26,22 @@ with open(os.environ["DINEOUT_DB_CREDENTIALS"], "r") as f:
     creds = json.load(f)
 
 
+def calculate_date_range(start_date, end_date, period="dod"):
+    drange = pd.date_range(start=start_date, end=end_date)
+
+    date_range = []
+    if period == "dod":
+        for date in drange:
+            date = date.to_pydatetime()
+            today_weekday = datetime.today().weekday()
+
+            if (date.weekday() + 1) % 7 == today_weekday:
+                date_range.append(date)
+
+    date_range = np.unique(np.array(date_range))
+    return date_range
+
+
 class DataFetcher:
     base_path = os.getcwd() + "/dumps"
     if not os.path.exists(base_path):
@@ -37,11 +54,11 @@ class DataFetcher:
             self.start_date = self.end_date - timedelta(self.end_date.weekday())
         elif period == "month":
             self.start_date = self.end_date.replace(day=1)
-        elif period == "dod":
-            start = self.end_date - relativedelta(months=+2)
-            self.start_date = start + timedelta(
-                days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
-            )
+        # elif period == "dod":
+        #     start = self.end_date - relativedelta(months=+2)
+        #     self.start_date = start + timedelta(
+        #         days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
+        #     )
         else:
             self.start_date = self.end_date
 
@@ -249,7 +266,7 @@ class DataFetcher:
         elif self.period == "month":
             query = queries.mau_data_month
         elif self.period == "dod":
-            query = queries.mau_data_dod
+            query = queries.mau_data_day
 
         fname_period = self.period.title()
         file_name = "mauData" + fname_period
@@ -292,15 +309,16 @@ class DataFetcher:
                     (data["month"] >= self.start_date.date())
                     & (data["month"] <= self.end_date.date())
                 ]
-            elif self.period == "dod":
-                data["dod"] = data["dod"].dt.date
-                data = data[
-                    (data["dod"] >= self.start_date.date())
-                    & (data["dod"] <= self.end_date.date())
-                ]
+            # elif self.period == "dod":
+            #     # get relevant dates list -> rel_dates from main.calculate_date_range()
+            #     rel_dates = calculate_date_range(
+            #         self.start_date, self.end_date, period="dod"
+            #     )
+
+            #     data["date"] = data["date"].dt.date
+            #     data = data.loc[data["date"].isin(rel_dates)]
             else:
                 data["date"] = data["date"].dt.date
                 data = data[(data["date"] == self.end_date.date())]
-
             data.to_parquet(file_path)
             return data

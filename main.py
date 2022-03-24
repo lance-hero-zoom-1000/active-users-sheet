@@ -11,16 +11,14 @@ print("Environment Variables Loaded: ", ok)
 
 from Updater.update_regular import update_regular
 from Updater.update_citywise import update_citywise
-from datetime import datetime, timedelta
-import calendar
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
 import json
-import numpy as np
-import pandas as pd
 import argparse
 import traceback
 from dineout_common.dineout_funcs import send_email
+from Helper.meta import calculate_date_range
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -32,45 +30,6 @@ formatter = logging.Formatter(
 stream = logging.StreamHandler()
 stream.setFormatter(formatter)
 logger.addHandler(stream)
-
-
-def calculate_date_range(start_date, end_date, period="month"):
-    drange = pd.date_range(start=start_date, end=end_date)
-
-    date_range = []
-    if period == "month":
-        for date in drange:
-            last_date = calendar.monthrange(date.year, date.month)[1]
-
-            last_date = datetime(date.year, date.month, last_date)
-            # check that date created is greater than and start date and less than end date
-            if (last_date >= start_date) & (last_date <= end_date):
-                date_range.append(last_date)
-
-    elif period == "week":
-        for date in drange:
-            date = date.to_pydatetime()
-            week_day = date - timedelta(days=date.weekday() + 1)
-
-            if (week_day >= start_date) & (week_day <= end_date):
-                date_range.append(week_day)
-
-    elif period == "day":
-        for date in drange:
-            date_to_append = date.to_pydatetime()
-
-            date_range.append(date_to_append)
-
-    elif period == "dod":
-        for date in drange:
-            date = date.to_pydatetime()
-            today_weekday = datetime.today().weekday()
-
-            if (date.weekday() + 1) % 7 == today_weekday:
-                date_range.append(date)
-
-    date_range = np.unique(np.array(date_range))
-    return date_range
 
 
 if __name__ == "__main__":
@@ -97,7 +56,14 @@ if __name__ == "__main__":
 
     # handle custom run
     if args.custom_run == None:
-        date_range = [args.custom_date]
+        if args.period != "dod":
+            date_range = [args.custom_date]
+        else:
+            date_range = calculate_date_range(
+                args.custom_date - relativedelta(months=2),
+                args.custom_date,
+                period=args.period,
+            )
     else:
         date_range = tuple(args.custom_run)
         start_date = datetime.strptime(date_range[0], "%Y-%m-%d")

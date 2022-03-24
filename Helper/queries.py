@@ -152,10 +152,3 @@ from mau_data_daily
 where 
 	`date` between date('{sdate}') and date('{edate}')
 """
-
-mau_data_dod = """
-select *
-from mau_data_daily
-where 
-	`date` between date('{sdate}') and date('{edate}') and (WEEKDAY(date)+3)%7 = WEEKDAY(GETDATE())
-"""

@@ -2,6 +2,10 @@ import os, json
 import pygsheets
 import pandas as pd
 import numpy as np
+from datetime import datetime
+from datetime import timedelta
+
+import calendar
 
 bookings_src_platform_mapping = {
     1: "Website",
@@ -66,6 +70,46 @@ top_cities = [
     "Others",
 ]
 
+# FUNCTION TO GET DATE_RANGE BASED
+def calculate_date_range(start_date, end_date, period="month"):
+    drange = pd.date_range(start=start_date, end=end_date)
+
+    date_range = []
+    if period == "month":
+        for date in drange:
+            last_date = calendar.monthrange(date.year, date.month)[1]
+
+            last_date = datetime(date.year, date.month, last_date)
+            # check that date created is greater than and start date and less than end date
+            if (last_date >= start_date) & (last_date <= end_date):
+                date_range.append(last_date)
+
+    elif period == "week":
+        for date in drange:
+            date = date.to_pydatetime()
+            week_day = date - timedelta(days=date.weekday() + 1)
+
+            if (week_day >= start_date) & (week_day <= end_date):
+                date_range.append(week_day)
+
+    elif period == "day":
+        for date in drange:
+            date_to_append = date.to_pydatetime()
+
+            date_range.append(date_to_append)
+
+    elif period == "dod":
+        for date in drange:
+            date = date.to_pydatetime()
+            today_weekday = end_date.weekday()
+
+            if (date.weekday()) % 7 == today_weekday:
+                date_range.append(date)
+
+    date_range = np.unique(np.array(date_range))
+    return date_range
+
+
 # FUNC TO GET CREDENTIALS
 def get_credentials(type="creds"):
     """Use function to get credentials which will be used to query dineout servers or connect to google sheets
@@ -87,7 +131,9 @@ def get_credentials(type="creds"):
             creds = json.load(f)
         return creds
     elif type == "gc":
-        gc = pygsheets.authorize(service_account_file=os.environ["GADINEOUT_SERVICE_ACCOUNT"])
+        gc = pygsheets.authorize(
+            service_account_file=os.environ["GADINEOUT_SERVICE_ACCOUNT"]
+        )
         return gc
     else:
         raise ValueError(
@@ -163,9 +209,7 @@ def mode_func(data: pd.DataFrame, **kwargs) -> pd.DataFrame:
     return x
 
 
-def rename_city_columns(
-    df: pd.DataFrame, values: tuple, totals=True
-) -> pd.DataFrame:
+def rename_city_columns(df: pd.DataFrame, values: tuple, totals=True) -> pd.DataFrame:
     """Used in city metrics calculations to rename the columns and add subtotals if needed
     TODO: define doc properly
     Args:
@@ -177,7 +221,7 @@ def rename_city_columns(
     Returns:
         pd.DataFrame: [description]
     """
-    
+
     df.columns = [values[0], values[1]]
 
     # CUSTOM SORT ACCORDING TO REGION-WISE CITY
