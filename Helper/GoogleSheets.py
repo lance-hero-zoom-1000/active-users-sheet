@@ -117,6 +117,14 @@ class BaseOperations:
 
         return "Updated Successfully"
 
+    def delete_from_sheet(self, bounds):
+        start = bounds["start"]
+        end = bounds["end"]
+        # self.sheet["DoD (WIP)"].clear(start=start, end=end, fields="userEnteredValue")
+        self.sheet.worksheet_by_title("DoD (WIP)").clear(
+            start=start, end=end, fields="userEnteredValue"
+        )
+
 
 class BaseOperationsCity:
     creds = get_credentials()

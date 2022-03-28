@@ -34,6 +34,20 @@ def update_regular(drange, period):
         dp_redeemed_df = metric_calculator.dp_redemption_users(mau_data=mau_data)
         no_redemptions_df = metric_calculator.dp_redemptions(mau_data=mau_data)
 
+        if period == "dod":
+            metric_calculator.delete_from_sheet(MetricCalculator.active_users_dict)
+            metric_calculator.delete_from_sheet(MetricCalculator.rdp_viewed_users_dict)
+            metric_calculator.delete_from_sheet(MetricCalculator.dopay_users_dict)
+            metric_calculator.delete_from_sheet(
+                MetricCalculator.dopay_transactions_dict
+            )
+            metric_calculator.delete_from_sheet(MetricCalculator.dp_users_in_db_dict)
+            metric_calculator.delete_from_sheet(MetricCalculator.dp_active_users_dict)
+            metric_calculator.delete_from_sheet(
+                MetricCalculator.dp_redemption_users_dict
+            )
+            metric_calculator.delete_from_sheet(MetricCalculator.dp_redemptions_dict)
+
         # update tables on google sheets
         metric_calculator.update_sheet(
             active_users_df, MetricCalculator.active_users_dict, format=format
