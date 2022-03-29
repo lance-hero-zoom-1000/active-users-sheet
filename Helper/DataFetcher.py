@@ -7,7 +7,6 @@ import logging
 import pandas as pd
 from dineout_common.dineout_funcs import get_data_from_server
 import Helper.queries as queries
-import calendar
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -54,11 +53,6 @@ class DataFetcher:
             self.start_date = self.end_date - timedelta(self.end_date.weekday())
         elif period == "month":
             self.start_date = self.end_date.replace(day=1)
-        # elif period == "dod":
-        #     start = self.end_date - relativedelta(months=+2)
-        #     self.start_date = start + timedelta(
-        #         days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
-        #     )
         else:
             self.start_date = self.end_date
 
@@ -309,14 +303,6 @@ class DataFetcher:
                     (data["month"] >= self.start_date.date())
                     & (data["month"] <= self.end_date.date())
                 ]
-            # elif self.period == "dod":
-            #     # get relevant dates list -> rel_dates from main.calculate_date_range()
-            #     rel_dates = calculate_date_range(
-            #         self.start_date, self.end_date, period="dod"
-            #     )
-
-            #     data["date"] = data["date"].dt.date
-            #     data = data.loc[data["date"].isin(rel_dates)]
             else:
                 data["date"] = data["date"].dt.date
                 data = data[(data["date"] == self.end_date.date())]

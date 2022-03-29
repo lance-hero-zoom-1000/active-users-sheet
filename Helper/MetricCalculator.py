@@ -112,7 +112,6 @@ class MetricCalculator(BaseOperations):
             s = pd.to_datetime(s)
             col_name = s.strftime("%b'%y")
         else:
-            print(data)
             s = data["date"].unique()[0]
             s = pd.to_datetime(s)
             col_name = s.strftime("%d-%b-%Y")
