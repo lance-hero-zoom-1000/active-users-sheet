@@ -3,14 +3,17 @@
 import os
 from dotenv import load_dotenv
 
-if os.path.exists("/home/jithin.haridas/projects/creds/.env"):
-    ok = load_dotenv("/home/jithin.haridas/projects/creds/.env")
-else:
+if os.path.exists("/home/lawrence.veigas/projects/creds/.env"):
+    ok = load_dotenv("/home/lawrence.veigas/projects/creds/.env")
+elif os.path.exists("C:\Projects\creds\.env"):
     ok = load_dotenv("C:\Projects\creds\.env")
+elif os.path.exists("/users/lawrence.veigas/downloads/projects/creds/.env"):
+    ok = load_dotenv("/users/lawrence.veigas/downloads/projects/creds/.env")
 print("Environment Variables Loaded: ", ok)
 
 from Updater.update_regular import update_regular
 from Updater.update_citywise import update_citywise
+from Updater.clear import clear
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
@@ -60,10 +63,15 @@ if __name__ == "__main__":
             date_range = [args.custom_date]
         else:
             date_range = calculate_date_range(
-                args.custom_date - relativedelta(months=2),
+                args.custom_date - relativedelta(weeks=6),
                 args.custom_date,
                 period=args.period,
             )
+            # CLEAR EXISTING VALUES
+            if not args.test:
+                clear(period=args.period)
+                clear(period=args.period, city=True)
+
     else:
         date_range = tuple(args.custom_run)
         start_date = datetime.strptime(date_range[0], "%Y-%m-%d")
