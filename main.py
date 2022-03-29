@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-t", "--test", action="store_true")
+    parser.add_argument("-c", "--clear", action="store_true")
     parser.add_argument("-p", "--period", default="day")
     parser.add_argument(
         "-cd",
@@ -67,16 +68,16 @@ if __name__ == "__main__":
                 args.custom_date,
                 period=args.period,
             )
-            # CLEAR EXISTING VALUES
-            if not args.test:
-                clear(period=args.period)
-                clear(period=args.period, city=True)
-
     else:
         date_range = tuple(args.custom_run)
         start_date = datetime.strptime(date_range[0], "%Y-%m-%d")
         end_date = datetime.strptime(date_range[1], "%Y-%m-%d")
         date_range = calculate_date_range(start_date, end_date, period=args.period)
+
+    # CLEAR EXISTING VALUES
+    if (args.clear) and (not args.test):
+        clear(period=args.period)
+        clear(period=args.period, city=True)
 
     logger.info("Creating instances of helpers")
 
