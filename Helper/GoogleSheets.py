@@ -45,19 +45,17 @@ class BaseOperations:
             self.formatter = FormatHelper("Month Summary")
 
         elif self.period == "dod":
-            start = self.end_date - relativedelta(months=+2)
-            self.start_date = start + timedelta(
-                days=abs((datetime.today().weekday() - (start.weekday() + 1) % 7)) % 7
-            )
-            self.wks = BaseOperations.sheet.worksheet_by_title("DoD (WIP)")
-            self.formatter = FormatHelper("DoD (WIP)")
+            self.start_date = self.end_date
+            self.wks = BaseOperations.sheet.worksheet_by_title("DoD Summary")
+            self.formatter = FormatHelper("DoD Summary")
 
         else:
             self.start_date = self.end_date
             self.wks = BaseOperations.sheet.worksheet_by_title("Daily Summary")
             self.formatter = FormatHelper("Daily Summary")
 
-        self.end_date = datetime.combine(end_date.date(), datetime.max.time())
+        self.end_date = datetime.combine(self.end_date.date(), datetime.max.time())
+        self.start_date = datetime.combine(self.start_date.date(), datetime.min.time())
 
     def get_data_from_sheet(self, bounds):
         # bounds should be a dict of tuples with start and end
@@ -117,13 +115,33 @@ class BaseOperations:
 
         return "Updated Successfully"
 
-    def delete_from_sheet(self, bounds):
+    def clearCustomRange(self, bounds):
         start = bounds["start"]
         end = bounds["end"]
-        # self.sheet["DoD (WIP)"].clear(start=start, end=end, fields="userEnteredValue")
-        self.sheet.worksheet_by_title("DoD (WIP)").clear(
-            start=start, end=end, fields="userEnteredValue"
-        )
+
+        logger.debug(f"Bounds: {bounds}")
+
+        # END ONLY DEFINES THE ROW NUMBER, WE NEED TO FIND THE DYNAMIC COLUMN NUMBER TOO
+        cols = self.wks.get_row(start[0], include_tailing_empty=False)
+        dynamic_end = None
+        if len(cols) > 0:
+            col_n = len(cols)
+
+            # REMEMBER THAT WE HAVE TO SUPPLY START AND END AS A TUPLE.
+            # THE END BOUND IS STORED AS AN INT AND THEN CONVERTED TO TUPLE AFTER
+            # WE FIND THE COL COORDINDATE DYNAMICALLY
+            dynamic_end = (end, col_n)
+
+            logger.debug(f"Clear Range coordinates: {start} to {dynamic_end}")
+
+        # ALSO WE ARE DEFINDING wks (worksheet) in the __init__ function,
+        # we can simply use self.wks instead of self.sheet.worksheet_by_title
+
+        # REVISIED CODE
+        # DOCUMENTATION DEFINES THAT WE CAN USE * TO CLEAR ALL FIELDS
+        # INSTEAD OF JUST USER-ENTERED VALUES
+        if dynamic_end != None:
+            self.wks.clear(start=start, end=dynamic_end, fields="*")
 
 
 class BaseOperationsCity:
@@ -144,12 +162,19 @@ class BaseOperationsCity:
             self.start_date = self.end_date.replace(day=1)
             self.wks = BaseOperationsCity.sheet.worksheet_by_title("Month Summary")
             self.formatter = FormatHelper("Month Summary", city=True)
+
+        elif self.period == "dod":
+            self.start_date = self.end_date
+            self.wks = BaseOperations.sheet.worksheet_by_title("DoD Summary")
+            self.formatter = FormatHelper("DoD Summary")
+
         else:
             self.start_date = self.end_date
             self.wks = BaseOperationsCity.sheet.worksheet_by_title("Daily Summary")
             self.formatter = FormatHelper("Daily Summary", city=True)
 
-        self.end_date = datetime.combine(end_date.date(), datetime.max.time())
+        self.end_date = datetime.combine(self.end_date.date(), datetime.max.time())
+        self.start_date = datetime.combine(self.start_date.date(), datetime.min.time())
 
     def update_sheet(
         self,
@@ -179,3 +204,6 @@ class BaseOperationsCity:
             self.formatter.format_worksheet(bounds_dict)
 
         return "Updated Successfully"
+
+    def clearCustomRange(self, bounds):
+        BaseOperations.clearCustomRange(self, bounds)
