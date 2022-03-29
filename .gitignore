@@ -6,4 +6,5 @@ venv/
 *.ipynb
 .DS_Store
 *.txt
+test.py
 !requirements.txt
