@@ -28,7 +28,9 @@ logger.addHandler(stream_handler)
 class BaseOperations:
     creds = get_credentials()
     gc = get_credentials(type="gc")
-    sheet = gc.open_by_url(creds.get("sheets").get("ga_sheet_automation"))
+    sheet = gc.open_by_url(
+        "https://docs.google.com/spreadsheets/d/1RH3YmlHvQgyAZaCSzL3Tp2KXIb0oARedkLWuRow6rMU/edit?usp=sharing"
+    )
 
     def __init__(self, end_date: datetime, period: str):
         self.end_date = datetime.combine(end_date.date(), datetime.max.time())
@@ -147,7 +149,9 @@ class BaseOperations:
 class BaseOperationsCity:
     creds = get_credentials()
     gc = get_credentials(type="gc")
-    sheet = gc.open_by_url(creds.get("sheets").get("ga_sheet_automation"))
+    sheet = gc.open_by_url(
+        "https://docs.google.com/spreadsheets/d/1RH3YmlHvQgyAZaCSzL3Tp2KXIb0oARedkLWuRow6rMU/edit?usp=sharing"
+    )
 
     def __init__(self, end_date: datetime, period: str):
         self.end_date = datetime.combine(end_date.date(), datetime.min.time())

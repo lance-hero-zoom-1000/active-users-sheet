@@ -33,6 +33,13 @@ def update_regular(drange, period):
         dp_active_df = metric_calculator.dp_active_users(mau_data=mau_data)
         dp_redeemed_df = metric_calculator.dp_redemption_users(mau_data=mau_data)
         no_redemptions_df = metric_calculator.dp_redemptions(mau_data=mau_data)
+        total_rdp_views_df = metric_calculator.total_rdp_views(mau_data=mau_data)
+        total_discovery_restaurant_views_df = (
+            metric_calculator.total_discovery_restaurant_views(mau_data=mau_data)
+        )
+        total_id_restaurant_views_df = metric_calculator.total_id_restaurant_views(
+            mau_data=mau_data
+        )
 
         # update tables on google sheets
         metric_calculator.update_sheet(
@@ -69,6 +76,21 @@ def update_regular(drange, period):
         metric_calculator.update_sheet(
             no_redemptions_df,
             bounds_dict=MetricCalculator.dp_redemptions_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_rdp_views_df,
+            bounds_dict=MetricCalculator.total_rdp_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_discovery_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_discovery_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_id_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_id_restaurant_views_dict,
             format=format,
         )
 
