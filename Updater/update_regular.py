@@ -52,6 +52,26 @@ def update_regular(drange, period):
             format=format,
         )
         metric_calculator.update_sheet(
+            total_rdp_views_df,
+            bounds_dict=MetricCalculator.total_rdp_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_discovery_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_discovery_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_id_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_id_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_app_launches_df,
+            bounds_dict=MetricCalculator.total_app_launches_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
             dopay_users_df, bounds_dict=MetricCalculator.dopay_users_dict, format=format
         )
         metric_calculator.update_sheet(
@@ -74,31 +94,11 @@ def update_regular(drange, period):
             bounds_dict=MetricCalculator.dp_redemption_users_dict,
             format=format,
         )
-        metric_calculator.update_sheet(
-            no_redemptions_df,
-            bounds_dict=MetricCalculator.dp_redemptions_dict,
-            format=format,
-        )
-        metric_calculator.update_sheet(
-            total_rdp_views_df,
-            bounds_dict=MetricCalculator.total_rdp_views_dict,
-            format=format,
-        )
-        metric_calculator.update_sheet(
-            total_discovery_restaurant_views_df,
-            bounds_dict=MetricCalculator.total_discovery_restaurant_views_dict,
-            format=format,
-        )
-        metric_calculator.update_sheet(
-            total_id_restaurant_views_df,
-            bounds_dict=MetricCalculator.total_id_restaurant_views_dict,
-            format=format,
-        )
-        metric_calculator.update_sheet(
-            total_app_launches_df,
-            bounds_dict=MetricCalculator.total_app_launches_dict,
-            format=format,
-        )
+        # metric_calculator.update_sheet(
+        #     no_redemptions_df,
+        #     bounds_dict=MetricCalculator.dp_redemptions_dict,
+        #     format=format,
+        # )
 
         del data_fetcher
         del metric_calculator
