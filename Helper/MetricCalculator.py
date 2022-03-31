@@ -41,56 +41,62 @@ class MetricCalculator(BaseOperations):
         "key": "RDP Viewed Users",
     }
     dopay_users_dict = {
-        "start": (50, 2),
-        "end": 55,
+        "start": (126, 2),
+        "end": 131,
         "value_rates": [5, 6],
         "key": "Dineout Pay Transacted Users",
     }
     dopay_transactions_dict = {
-        "start": (69, 2),
-        "end": 80,
+        "start": (145, 2),
+        "end": 156,
         "value_rates": [5, 6, 11, 12],
         "key": "Dineout Pay Transactions and GMV",
     }
     dp_users_in_db_dict = {
-        "start": (94, 2),
-        "end": 100,
+        "start": (170, 2),
+        "end": 176,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Users with Active DP Subscription",
     }
     dp_active_users_dict = {
-        "start": (102, 2),
-        "end": 108,
+        "start": (178, 2),
+        "end": 184,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who launched App",
     }
     dp_redemption_users_dict = {
-        "start": (118, 2),
-        "end": 124,
+        "start": (194, 2),
+        "end": 200,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who redeemed",
     }
     dp_redemptions_dict = {
-        "start": (134, 2),
-        "end": 140,
+        "start": (210, 2),
+        "end": 216,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Total Redemptions by DP Users",
     }
     total_rdp_views_dict = {
-        "start": (531, 2),
-        "end": 539,
+        "start": (50, 2),
+        "end": 58,
         "value_rates": [5, 6, 8, 9],
         "key": "Total RDP Views",
     }
     total_discovery_restaurant_views_dict = {
-        "start": (550, 2),
-        "end": 558,
+        "start": (69, 2),
+        "end": 77,
         "value_rates": [5, 6, 8, 9],
         "key": "Total Discovery Restaurant Views",
     }
     total_id_restaurant_views_dict = {
-        "start": (569, 2),
-        "end": 577,
+        "start": (88, 2),
+        "end": 96,
+        "value_rates": [5, 6, 8, 9],
+        "key": "Total Discovery Restaurant Views",
+    }
+    total_app_launches_dict = {
+        "start": (107, 2),
+        "end": 115,
         "value_rates": [5, 6, 8, 9],
         "key": "Total Discovery Restaurant Views",
     }
@@ -634,7 +640,7 @@ class MetricCalculator(BaseOperations):
         data = kwargs.get("mau_data")
 
         table = {
-            "Total ID Restaurant Views": data["total_id_restaurants_visited"].sum(),
+            "Total ID Restaurant Vi": data["total_id_restaurants_visited"].sum(),
             "DP members": data["total_id_restaurants_visited"][
                 data["subscription_type"] != "non_dp_members"
             ].sum(),
@@ -676,5 +682,57 @@ class MetricCalculator(BaseOperations):
         except AttributeError:
             col_name = MetricCalculator.get_column_name(self, data)
 
-        table.columns = [MetricCalculator.total_rdp_views_dict.get("key"), col_name]
+        table.columns = [
+            MetricCalculator.total_id_restaurant_views_dict.get("key"),
+            col_name,
+        ]
+        return table
+
+    def total_app_launches(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        table = {
+            "Total ID Restaurant Vi": data["total_app_launches"].sum(),
+            "DP members": data["total_app_launches"][
+                data["subscription_type"] != "non_dp_members"
+            ].sum(),
+            "Non DP (Logged in users)": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] == "active")
+            ].sum(),
+            "New Users": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] == "active")
+                & (data["new_visitor_flag"] == 1)
+            ].sum(),
+            "Returning Users": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] == "active")
+                & (data["new_visitor_flag"] == 0)
+            ].sum(),
+            "Non Logged in users": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] != "active")
+            ].sum(),
+            "New Users ": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] != "active")
+                & (data["new_visitor_flag"] == 1)
+            ].sum(),
+            "Returning Users ": data["total_app_launches"][
+                (data["subscription_type"] == "non_dp_members")
+                & (data["login_status"] != "active")
+                & (data["new_visitor_flag"] == 0)
+            ].sum(),
+        }
+
+        table = pd.DataFrame.from_dict(table, orient="index")
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculator.get_column_name(self, data)
+
+        table.columns = [MetricCalculator.total_app_launches_dict.get("key"), col_name]
         return table

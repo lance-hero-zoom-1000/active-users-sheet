@@ -40,6 +40,7 @@ def update_regular(drange, period):
         total_id_restaurant_views_df = metric_calculator.total_id_restaurant_views(
             mau_data=mau_data
         )
+        total_app_launches_df = metric_calculator.total_app_launches(mau_data=mau_data)
 
         # update tables on google sheets
         metric_calculator.update_sheet(
@@ -91,6 +92,11 @@ def update_regular(drange, period):
         metric_calculator.update_sheet(
             total_id_restaurant_views_df,
             bounds_dict=MetricCalculator.total_id_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_app_launches_df,
+            bounds_dict=MetricCalculator.total_app_launches_dict,
             format=format,
         )
 

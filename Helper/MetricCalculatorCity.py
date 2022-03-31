@@ -30,29 +30,49 @@ class MetricCalculatorCity(BaseOperationsCity):
     # - col_name
 
     active_users_dict = {
-        "start": (154, 1),
-        "end": 179,
+        "start": (231, 1),
+        "end": 256,
         "key": "Citywise Active Users (Overall)",
     }
     dp_active_users_dict = {
-        "start": (212, 1),
-        "end": 237,
+        "start": (289, 1),
+        "end": 314,
         "key": "DP Users who launched App",
     }
     loggedin_active_users_dict = {
-        "start": (299, 1),
-        "end": 324,
+        "start": (376, 1),
+        "end": 401,
         "key": "Logged In Users who launched App (Non DP members)",
     }
     non_loggedin_active_users_dict = {
-        "start": (388, 1),
-        "end": 413,
+        "start": (465, 1),
+        "end": 490,
         "key": "Non Logged In Users who launched App",
     }
     rdp_viewed_users_dict = {
-        "start": (475, 1),
-        "end": 500,
+        "start": (552, 1),
+        "end": 577,
         "key": "Users who viewed RDP (Overall)",
+    }
+    transactions_dict = {
+        "start": (608, 1),
+        "end": 633,
+        "key": "Transactions",
+    }
+    gmv_dict = {
+        "start": (720, 1),
+        "end": 745,
+        "key": "Transactions",
+    }
+    app_launch_to_transaction_dict = {
+        "start": (832, 1),
+        "end": 857,
+        "key": "Transactions",
+    }
+    rdp_view_to_transaction_dict = {
+        "start": (944, 1),
+        "end": 969,
+        "key": "Transactions",
     }
 
     @staticmethod
@@ -221,6 +241,98 @@ class MetricCalculatorCity(BaseOperationsCity):
             col_name = MetricCalculatorCity.get_column_name(self, data)
 
         col_names = (MetricCalculatorCity.rdp_viewed_users_dict.get("key"), col_name)
+        table = rename_city_columns(table, col_names)
+
+        return table
+
+    def calculate_transaction(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
+        )
+
+        table = pd.DataFrame(data.groupby("City")["do_pay_transactions"].sum())
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculatorCity.get_column_name(self, data)
+
+        col_names = (MetricCalculatorCity.transactions_dict.get("key"), col_name)
+        table = rename_city_columns(table, col_names)
+
+        return table
+
+    def calculate_gmv(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
+        )
+
+        table = pd.DataFrame(data.groupby("City")["do_pay_gmv"].sum())
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculatorCity.get_column_name(self, data)
+
+        col_names = (MetricCalculatorCity.gmv_dict.get("key"), col_name)
+        table = rename_city_columns(table, col_names)
+
+        return table
+
+    def calculate_app_launch_to_transaction_percentage(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
+        )
+
+        table = pd.DataFrame(
+            data.groupby("City")["do_pay_transacted_users"].sum()
+            / data.groupby("City")["users"].sum()
+        )
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculatorCity.get_column_name(self, data)
+
+        col_names = (
+            MetricCalculatorCity.app_launch_to_transaction_dict.get("key"),
+            col_name,
+        )
+        table = rename_city_columns(table, col_names)
+
+        return table
+
+    def calculate_rdp_view_to_transaction_percentage(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        data["City"] = data["custom_dimension_city"].apply(
+            lambda x: x if x in top_cities else "Others"
+        )
+
+        table = pd.DataFrame(
+            data.groupby("City")["do_pay_transacted_users"].sum()
+            / data.groupby("City")["restaurants_visited_users"].sum()
+        )
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculatorCity.get_column_name(self, data)
+
+        col_names = (
+            MetricCalculatorCity.rdp_view_to_transaction_dict.get("key"),
+            col_name,
+        )
         table = rename_city_columns(table, col_names)
 
         return table
