@@ -30,8 +30,7 @@ def update_citywise(drange, period):
         e = updater.calculate_rdp_views_overall(mau_data=mau_data)
         f = updater.calculate_transaction(mau_data=mau_data)
         g = updater.calculate_gmv(mau_data=mau_data)
-        h = updater.calculate_app_launch_to_transaction_percentage(mau_data=mau_data)
-        i = updater.calculate_rdp_view_to_transaction_percentage(mau_data=mau_data)
+        h = updater.calculate_transacted_users(mau_data=mau_data)
 
         # update sheet
         updater.update_sheet(a, MetricCalculatorCity.active_users_dict, format=format)
@@ -50,10 +49,7 @@ def update_citywise(drange, period):
         updater.update_sheet(f, MetricCalculatorCity.transactions_dict, format=format)
         updater.update_sheet(g, MetricCalculatorCity.gmv_dict, format=format)
         updater.update_sheet(
-            h, MetricCalculatorCity.app_launch_to_transaction_dict, format=format
-        )
-        updater.update_sheet(
-            i, MetricCalculatorCity.rdp_view_to_transaction_dict, format=format
+            h, MetricCalculatorCity.transacted_users_dict, format=format
         )
 
         del df, updater, mau_data

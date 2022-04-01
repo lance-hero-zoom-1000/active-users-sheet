@@ -30,49 +30,44 @@ class MetricCalculatorCity(BaseOperationsCity):
     # - col_name
 
     active_users_dict = {
-        "start": (231, 1),
-        "end": 256,
+        "start": (243, 1),
+        "end": 268,
         "key": "Citywise Active Users (Overall)",
     }
     dp_active_users_dict = {
-        "start": (289, 1),
-        "end": 314,
+        "start": (301, 1),
+        "end": 326,
         "key": "DP Users who launched App",
     }
     loggedin_active_users_dict = {
-        "start": (376, 1),
-        "end": 401,
+        "start": (388, 1),
+        "end": 413,
         "key": "Logged In Users who launched App (Non DP members)",
     }
     non_loggedin_active_users_dict = {
-        "start": (465, 1),
-        "end": 490,
+        "start": (477, 1),
+        "end": 502,
         "key": "Non Logged In Users who launched App",
     }
     rdp_viewed_users_dict = {
-        "start": (552, 1),
-        "end": 577,
+        "start": (564, 1),
+        "end": 589,
         "key": "Users who viewed RDP (Overall)",
     }
     transactions_dict = {
-        "start": (608, 1),
-        "end": 633,
+        "start": (709, 1),
+        "end": 734,
         "key": "Transactions",
     }
     gmv_dict = {
-        "start": (720, 1),
-        "end": 745,
-        "key": "Transactions",
+        "start": (767, 1),
+        "end": 792,
+        "key": "GMV",
     }
-    app_launch_to_transaction_dict = {
-        "start": (832, 1),
-        "end": 857,
-        "key": "Transactions",
-    }
-    rdp_view_to_transaction_dict = {
-        "start": (944, 1),
-        "end": 969,
-        "key": "Transactions",
+    transacted_users_dict = {
+        "start": (622, 1),
+        "end": 647,
+        "key": "Transacted Users",
     }
 
     @staticmethod
@@ -285,17 +280,14 @@ class MetricCalculatorCity(BaseOperationsCity):
 
         return table
 
-    def calculate_app_launch_to_transaction_percentage(self, **kwargs):
+    def calculate_transacted_users(self, **kwargs):
         data = kwargs.get("mau_data")
 
         data["City"] = data["custom_dimension_city"].apply(
             lambda x: x if x in top_cities else "Others"
         )
 
-        table = pd.DataFrame(
-            data.groupby("City")["do_pay_transacted_users"].sum()
-            / data.groupby("City")["users"].sum()
-        )
+        table = pd.DataFrame(data.groupby("City")["do_pay_transacted_users"].sum())
         table.reset_index(inplace=True)
 
         try:
@@ -303,36 +295,7 @@ class MetricCalculatorCity(BaseOperationsCity):
         except AttributeError:
             col_name = MetricCalculatorCity.get_column_name(self, data)
 
-        col_names = (
-            MetricCalculatorCity.app_launch_to_transaction_dict.get("key"),
-            col_name,
-        )
-        table = rename_city_columns(table, col_names)
-
-        return table
-
-    def calculate_rdp_view_to_transaction_percentage(self, **kwargs):
-        data = kwargs.get("mau_data")
-
-        data["City"] = data["custom_dimension_city"].apply(
-            lambda x: x if x in top_cities else "Others"
-        )
-
-        table = pd.DataFrame(
-            data.groupby("City")["do_pay_transacted_users"].sum()
-            / data.groupby("City")["restaurants_visited_users"].sum()
-        )
-        table.reset_index(inplace=True)
-
-        try:
-            col_name = self.col_name
-        except AttributeError:
-            col_name = MetricCalculatorCity.get_column_name(self, data)
-
-        col_names = (
-            MetricCalculatorCity.rdp_view_to_transaction_dict.get("key"),
-            col_name,
-        )
+        col_names = (MetricCalculatorCity.transacted_users_dict.get("key"), col_name)
         table = rename_city_columns(table, col_names)
 
         return table

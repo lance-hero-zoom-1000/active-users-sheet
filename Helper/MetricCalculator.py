@@ -35,70 +35,88 @@ class MetricCalculator(BaseOperations):
         "key": "Active Users",
     }
     rdp_viewed_users_dict = {
-        "start": (31, 2),
-        "end": 39,
+        "start": (50, 2),
+        "end": 58,
         "value_rates": [5, 6, 8, 9],
         "key": "RDP Viewed Users",
     }
     dopay_users_dict = {
-        "start": (126, 2),
-        "end": 131,
+        "start": (138, 2),
+        "end": 143,
         "value_rates": [5, 6],
         "key": "Dineout Pay Transacted Users",
     }
     dopay_transactions_dict = {
-        "start": (145, 2),
-        "end": 156,
+        "start": (157, 2),
+        "end": 168,
         "value_rates": [5, 6, 11, 12],
         "key": "Dineout Pay Transactions and GMV",
     }
     dp_users_in_db_dict = {
-        "start": (170, 2),
-        "end": 176,
+        "start": (182, 2),
+        "end": 188,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Users with Active DP Subscription",
     }
     dp_active_users_dict = {
-        "start": (178, 2),
-        "end": 184,
+        "start": (190, 2),
+        "end": 196,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who launched App",
     }
     dp_redemption_users_dict = {
-        "start": (194, 2),
-        "end": 200,
+        "start": (206, 2),
+        "end": 212,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "DP Users who redeemed",
     }
     dp_redemptions_dict = {
-        "start": (210, 2),
-        "end": 216,
+        "start": (222, 2),
+        "end": 228,
         "value_rates": [3, 4, 5, 6, 7],
         "key": "Total Redemptions by DP Users",
     }
     total_rdp_views_dict = {
-        "start": (50, 2),
-        "end": 58,
+        "start": (69, 2),
+        "end": 77,
         "value_rates": [5, 6, 8, 9],
         "key": "Total RDP Views",
     }
     total_discovery_restaurant_views_dict = {
-        "start": (69, 2),
-        "end": 77,
-        "value_rates": [5, 6, 8, 9],
-        "key": "Total Discovery Restaurant Views",
-    }
-    total_id_restaurant_views_dict = {
         "start": (88, 2),
         "end": 96,
         "value_rates": [5, 6, 8, 9],
-        "key": "Total Discovery Restaurant Views",
+        "key": "Discovery Restaurant Views Per User",
+    }
+    total_id_restaurant_views_dict = {
+        "start": (98, 2),
+        "end": 106,
+        "value_rates": [5, 6, 8, 9],
+        "key": "ID Restaurant Views Per User",
     }
     total_app_launches_dict = {
-        "start": (107, 2),
-        "end": 115,
+        "start": (31, 2),
+        "end": 39,
         "value_rates": [5, 6, 8, 9],
-        "key": "Total Discovery Restaurant Views",
+        "key": "Total App Launches",
+    }
+    total_dp_restaurant_views_dict = {
+        "start": (108, 2),
+        "end": 116,
+        "value_rates": [5, 6, 8, 9],
+        "key": "DP Restaurant Views Per User",
+    }
+    total_ff_restaurant_views_dict = {
+        "start": (118, 2),
+        "end": 126,
+        "value_rates": [5, 6, 8, 9],
+        "key": "Fulfilment Restaurant Views Per User",
+    }
+    total_reserve_restaurant_views_dict = {
+        "start": (128, 2),
+        "end": 136,
+        "value_rates": [5, 6, 8, 9],
+        "key": "Reserve Restaurant Views Per User",
     }
 
     @staticmethod
@@ -586,40 +604,100 @@ class MetricCalculator(BaseOperations):
         data = kwargs.get("mau_data")
 
         table = {
-            "Total Discovery Restaurant Views": data[
-                "total_discovery_restaurants_visited"
-            ].sum(),
-            "DP members": data["total_discovery_restaurants_visited"][
-                data["subscription_type"] != "non_dp_members"
-            ].sum(),
-            "Non DP (Logged in users)": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-            ].sum(),
-            "New Users": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-                & (data["new_visitor_flag"] == 1)
-            ].sum(),
-            "Returning Users": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-                & (data["new_visitor_flag"] == 0)
-            ].sum(),
-            "Non Logged in users": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-            ].sum(),
-            "New Users ": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-                & (data["new_visitor_flag"] == 1)
-            ].sum(),
-            "Returning Users ": data["total_discovery_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-                & (data["new_visitor_flag"] == 0)
-            ].sum(),
+            "Discovery Restaurant Views Per User": (
+                data["total_discovery_restaurants_visited"].sum()
+            )
+            / (data["discovery_restaurants_visited_users"].sum()),
+            "DP members": (
+                data["total_discovery_restaurants_visited"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            ),
+            "Non DP (Logged in users)": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            ),
+            "New Users": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+            "Non Logged in users": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            ),
+            "New Users ": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users ": (
+                data["total_discovery_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["discovery_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
         }
 
         table = pd.DataFrame.from_dict(table, orient="index")
@@ -640,38 +718,98 @@ class MetricCalculator(BaseOperations):
         data = kwargs.get("mau_data")
 
         table = {
-            "Total ID Restaurant Vi": data["total_id_restaurants_visited"].sum(),
-            "DP members": data["total_id_restaurants_visited"][
-                data["subscription_type"] != "non_dp_members"
-            ].sum(),
-            "Non DP (Logged in users)": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-            ].sum(),
-            "New Users": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-                & (data["new_visitor_flag"] == 1)
-            ].sum(),
-            "Returning Users": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] == "active")
-                & (data["new_visitor_flag"] == 0)
-            ].sum(),
-            "Non Logged in users": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-            ].sum(),
-            "New Users ": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-                & (data["new_visitor_flag"] == 1)
-            ].sum(),
-            "Returning Users ": data["total_id_restaurants_visited"][
-                (data["subscription_type"] == "non_dp_members")
-                & (data["login_status"] != "active")
-                & (data["new_visitor_flag"] == 0)
-            ].sum(),
+            "ID Restaurant Views Per User": (data["total_id_restaurants_visited"].sum())
+            / (data["id_restaurants_visited_users"].sum()),
+            "DP members": (
+                data["total_id_restaurants_visited"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            ),
+            "Non DP (Logged in users)": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            ),
+            "New Users": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+            "Non Logged in users": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            ),
+            "New Users ": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users ": (
+                data["total_id_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["id_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
         }
 
         table = pd.DataFrame.from_dict(table, orient="index")
@@ -692,7 +830,7 @@ class MetricCalculator(BaseOperations):
         data = kwargs.get("mau_data")
 
         table = {
-            "Total ID Restaurant Vi": data["total_app_launches"].sum(),
+            "Total App Launches": data["total_app_launches"].sum(),
             "DP members": data["total_app_launches"][
                 data["subscription_type"] != "non_dp_members"
             ].sum(),
@@ -735,4 +873,346 @@ class MetricCalculator(BaseOperations):
             col_name = MetricCalculator.get_column_name(self, data)
 
         table.columns = [MetricCalculator.total_app_launches_dict.get("key"), col_name]
+        return table
+
+    def total_DP_restaurant_views(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        table = {
+            "Discovery Restaurant Views Per User": (
+                data["total_dp_restaurants_visited"].sum()
+            )
+            / (data["dp_restaurants_visited_users"].sum()),
+            "DP members": (
+                data["total_dp_restaurants_visited"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            ),
+            "Non DP (Logged in users)": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            ),
+            "New Users": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+            "Non Logged in users": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            ),
+            "New Users ": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users ": (
+                data["total_dp_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["dp_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+        }
+
+        table = pd.DataFrame.from_dict(table, orient="index")
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculator.get_column_name(self, data)
+
+        table.columns = [
+            MetricCalculator.total_dp_restaurant_views_dict.get("key"),
+            col_name,
+        ]
+        return table
+
+    def total_ff_restaurant_views(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        table = {
+            "Discovery Restaurant Views Per User": (
+                data["total_ff_restaurants_visited"].sum()
+            )
+            / (data["ff_restaurants_visited_users"].sum()),
+            "DP members": (
+                data["total_ff_restaurants_visited"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            ),
+            "Non DP (Logged in users)": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            ),
+            "New Users": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+            "Non Logged in users": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            ),
+            "New Users ": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users ": (
+                data["total_ff_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["ff_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+        }
+
+        table = pd.DataFrame.from_dict(table, orient="index")
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculator.get_column_name(self, data)
+
+        table.columns = [
+            MetricCalculator.total_ff_restaurant_views_dict.get("key"),
+            col_name,
+        ]
+        return table
+
+    def total_reserve_restaurant_views(self, **kwargs):
+        data = kwargs.get("mau_data")
+
+        table = {
+            "Discovery Restaurant Views Per User": (
+                data["total_reserve_restaurants_visited"].sum()
+            )
+            / (data["reserve_restaurants_visited_users"].sum()),
+            "DP members": (
+                data["total_reserve_restaurants_visited"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    data["subscription_type"] != "non_dp_members"
+                ].sum()
+            ),
+            "Non DP (Logged in users)": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                ].sum()
+            ),
+            "New Users": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] == "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+            "Non Logged in users": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                ].sum()
+            ),
+            "New Users ": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 1)
+                ].sum()
+            ),
+            "Returning Users ": (
+                data["total_reserve_restaurants_visited"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            )
+            / (
+                data["reserve_restaurants_visited_users"][
+                    (data["subscription_type"] == "non_dp_members")
+                    & (data["login_status"] != "active")
+                    & (data["new_visitor_flag"] == 0)
+                ].sum()
+            ),
+        }
+
+        table = pd.DataFrame.from_dict(table, orient="index")
+        table.reset_index(inplace=True)
+
+        try:
+            col_name = self.col_name
+        except AttributeError:
+            col_name = MetricCalculator.get_column_name(self, data)
+
+        table.columns = [
+            MetricCalculator.total_reserve_restaurant_views_dict.get("key"),
+            col_name,
+        ]
         return table

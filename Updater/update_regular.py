@@ -41,6 +41,15 @@ def update_regular(drange, period):
             mau_data=mau_data
         )
         total_app_launches_df = metric_calculator.total_app_launches(mau_data=mau_data)
+        total_dp_restaurant_views_df = metric_calculator.total_DP_restaurant_views(
+            mau_data=mau_data
+        )
+        total_ff_restaurant_views_df = metric_calculator.total_ff_restaurant_views(
+            mau_data=mau_data
+        )
+        total_reserve_restaurant_views_df = (
+            metric_calculator.total_reserve_restaurant_views(mau_data=mau_data)
+        )
 
         # update tables on google sheets
         metric_calculator.update_sheet(
@@ -59,6 +68,21 @@ def update_regular(drange, period):
         metric_calculator.update_sheet(
             total_discovery_restaurant_views_df,
             bounds_dict=MetricCalculator.total_discovery_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_dp_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_dp_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_ff_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_ff_restaurant_views_dict,
+            format=format,
+        )
+        metric_calculator.update_sheet(
+            total_reserve_restaurant_views_df,
+            bounds_dict=MetricCalculator.total_reserve_restaurant_views_dict,
             format=format,
         )
         metric_calculator.update_sheet(
@@ -94,11 +118,11 @@ def update_regular(drange, period):
             bounds_dict=MetricCalculator.dp_redemption_users_dict,
             format=format,
         )
-        # metric_calculator.update_sheet(
-        #     no_redemptions_df,
-        #     bounds_dict=MetricCalculator.dp_redemptions_dict,
-        #     format=format,
-        # )
+        metric_calculator.update_sheet(
+            no_redemptions_df,
+            bounds_dict=MetricCalculator.dp_redemptions_dict,
+            format=format,
+        )
 
         del data_fetcher
         del metric_calculator

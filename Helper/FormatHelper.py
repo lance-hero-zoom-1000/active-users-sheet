@@ -197,7 +197,7 @@ class SheetFormats:
 
 class FormatHelper(SheetFormats):
     sheet = gc.open_by_url(
-        creds.get("sheets").get("ga_sheet_automation")
+        "https://docs.google.com/spreadsheets/d/1RH3YmlHvQgyAZaCSzL3Tp2KXIb0oARedkLWuRow6rMU/edit?usp=sharing"
     )
 
     def __init__(self, worksheet_title, city=False):
@@ -273,12 +273,6 @@ class FormatHelper(SheetFormats):
                     start[0] + 22,
                     end_row - 2,
                 ]
-
-            n_col = self.wks.get_row(
-                start[0],
-                include_tailing_empty=False,
-            )
-            n_col = len(n_col)
         else:
             start = bounds.get("start")
             end_row = bounds.get("end")
@@ -287,11 +281,14 @@ class FormatHelper(SheetFormats):
             light = bounds.get("light")
             value_rates = bounds.get("value_rates")
             avg_rates = bounds.get("avg_rates")
-            n_col = self.wks.get_row(
-                start[0],
-                include_tailing_empty=False,
-            )
-            n_col = len(n_col)
+
+        # get no. of columns dynamically
+        sheet_cols = self.wks.get_row(
+            start[0],
+            include_tailing_empty=False,
+        )
+        n_col = len(sheet_cols)
+        logger.debug(f"Sheet row values: {sheet_cols}")
 
         logger.info(f"Updating Formats: {update_type}")
         if update_type == "TABLE_VALUES":
